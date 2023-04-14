@@ -15,14 +15,18 @@ const operate = (operator, num1, num2) => {
     case "/":
       return divide(num1, num2);
     default:
-      return null;
+      throw new Error(`Unknown operator: ${operator}`);
   }
 };
 
 const display = document.querySelector(".display p");
 let displayValue = "0";
+let previousValue = null;
+let selectedOperator = null;
+let chainOperations = false;
 
 const updateDisplay = (value) => {
+  if (value === "=") return;
   displayValue = displayValue === "0" ? value : displayValue + value;
   display.textContent = displayValue;
 };
@@ -32,10 +36,6 @@ document
   .forEach((button) => {
     button.addEventListener("click", () => updateDisplay(button.textContent));
   });
-
-let previousValue = null;
-let selectedOperator = null;
-let chainOperations = false;
 
 document.querySelectorAll(".buttons button.operator").forEach((button) => {
   button.addEventListener("click", () => {
@@ -51,7 +51,7 @@ document.querySelectorAll(".buttons button.operator").forEach((button) => {
 
     selectedOperator = button.textContent;
     displayValue = "0";
-    chainOperations = true;
+    chainOperations = false;
   });
 });
 
@@ -72,4 +72,26 @@ document.querySelector(".clear").addEventListener("click", () => {
   previousValue = null;
   selectedOperator = null;
   display.textContent = displayValue;
+});
+
+document.addEventListener("keydown", (event) => {
+  const key = event.key;
+
+  if (!isNaN(key) || key === ".") {
+    updateDisplay(key);
+  } else if (
+    key === "+" ||
+    key === "-" ||
+    key === "*" ||
+    key === "/" ||
+    key === "="
+  ) {
+    if (key === "=") {
+      document.querySelector(".equals").click();
+    } else {
+      document.querySelector(`button.operator[data-key="${key}"]`).click();
+    }
+  } else if (key.toLowerCase() === "c") {
+    document.querySelector(".clear").click();
+  }
 });
